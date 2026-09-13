@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Для тебя ❤️</title>
+<!-- Рукописный шрифт Caveat -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+user-select: none;
+-webkit-tap-highlight-color: transparent;
+}
+
+body, html {
+width: 100%;
+height: 100%;
+overflow: hidden;
+font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+background-color: #d8d8d8;
+transition: background-color 1.2s ease;
+}
+
+/* Виньетка (тени по бокам) */
+.vignette {
+position: fixed;
+top: 0; left: 0;
+width: 100vw; height: 100vh;
+pointer-events: none;
+box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85),
+inset 0 0 200px rgba(0, 0, 0, 0.95);
+z-index: 100;
+}
+
+/* Фоновый коллаж из ваших фотографий */
+.photo-bg {
+position: fixed;
+top: 0; left: 0;
+width: 100vw; height: 100vh;
+z-index: 1;
+opacity: 0;
+transition: opacity 2s ease;
+pointer-events: none;
+overflow: hidden;
+background: #111;
+}
+
+.photo-bg.active {
+opacity: 1;
+}
+
+.polaroid {
+position: absolute;
+background: #fff;
+padding: 8px 8px 25px 8px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+border-radius: 4px;
+width: 130px;
+opacity: 0.75;
+filter: brightness(0.85);
+}
+
+.polaroid img {
+width: 100%;
+height: 140px;
+object-fit: cover;
+border-radius: 2px;
+}
+
+/* Позиционирование фото по краям */
+.p1 { top: -20px; left: -20px; transform: rotate(-12deg); }
+.p2 { top: 20%; right: -30px; transform: rotate(15deg); }
+.p3 { bottom: 10%; left: -25px; transform: rotate(-8deg); }
+.p4 { bottom: -20px; right: 10px; transform: rotate(10deg); }
+.p5 { top: 45%; left: -35px; transform: rotate(18deg); }
+.p6 { top: -10px; right: 20px; transform: rotate(-15deg); }
+.p7 { bottom: -30px; left: 30%; transform: rotate(-5deg); }
+.p8 { top: 35%; right: -20px; transform: rotate(-12deg); }
+
+/* Контейнер */
+.container {
+position: relative;
+width: 100%; height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 10;
+}
+
+/* Шаги */
+.step {
+position: absolute;
+max-width: 90%;
+width: 450px;
+text-align: center;
+opacity: 0;
+visibility: hidden;
+transform: scale(0.96) translateY(15px);
+transition: opacity 1.2s ease, transform 1.2s ease, visibility 1.2s ease;
+color: #1a1a1a;
+}
+
+.step.active {
+opacity: 1;
+visibility: visible;
+transform: scale(1) translateY(0);
+}
+
+h1, h2 {
+font-weight: 300;
+letter-spacing: 1px;
+margin-bottom: 20px;
+line-height: 1.4;
+}
+
+p.hint {
+font-size: 0.9rem;
+color: #666;
+margin-top: 15px;
+animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 0.4; }
+50% { opacity: 0.9; }
+}
+
+/* Поля ввода и кнопки */
+.input-group {
+margin-top: 25px;
+display: flex;
+flex-direction: column;
+gap: 15px;
+align-items: center;
+opacity: 0;
+transform: translateY(10px);
+transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.input-group.show { opacity: 1; transform: translateY(0); }
+
+input[type="text"] {
+width: 100%;
+padding: 14px 20px;
+border: 1px solid rgba(0, 0, 0, 0.15);
+border-radius: 30px;
+background: rgba(255, 255, 255, 0.7);
+backdrop-filter: blur(5px);
+font-size: 1.1rem;
+text-align: center;
+outline: none;
+color: #1a1a1a;
+transition: all 0.5s ease;
+}
+
+button.btn {
+padding: 12px 35px;
+border: none;
+border-radius: 30px;
+background: #2b2b2b;
+color: #ffffff;
+font-size: 1rem;
+cursor: pointer;
+transition: all 0.4s ease;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.mood-buttons {
+display: flex;
+flex-direction: column;
+gap: 15px;
+margin-top: 25px;
+align-items: center;
+}
+.btn-good { background: #2e7d32 !important; width: 220px; }
+.btn-normal { background: #757575 !important; width: 220px; }
+.btn-bad {
+background: #c62828 !important;
+width: 220px;
+position: relative;
+transition: left 0.2s ease, top 0.2s ease !important;
+}
+
+.timer-display {
+font-size: 4rem;
+font-weight: 300;
+margin: 20px 0;
+}
+
+body.flash-correct { background-color: #43a047 !important; }
+body.flash-wrong { background-color: #e53935 !important; }
+
+/* --- КОНВЕРТ И ПИСЬМО --- */
+.envelope-wrapper {
+position: relative;
+width: 320px;
+height: 220px;
+background: #c2a383;
+border-radius: 8px;
+box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+margin: 0 auto;
+display: flex;
+justify-content: center;
+align-items: center;
+transition: all 1s ease;
+}
+
+/* Крышка конверта */
+.envelope-flap {
+position: absolute;
+top: 0; left: 0;
+width: 0; height: 0;
+border-left: 160px solid transparent;
+border-right: 160px solid transparent;
+border-top: 120px solid #a8896a;
+transform-origin: top;
+transition: transform 0.8s ease 0.4s;
+z-index: 4;
+}
+
+.envelope-wrapper.open .envelope-flap {
+transform: rotateX(180deg);
+z-index: 1;
+}
+
+/* Сургучная печать */
+.wax-seal {
+position: absolute;
+width: 60px; height: 60px;
+background: radial-gradient(circle, #b71c1c 40%, #880e4f 90%);
+border-radius: 50%;
+box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.4);
+display: flex;
+justify-content: center;
+align-items: center;
+color: #ffd700;
+font-size: 24px;
+z-index: 5;
+transition: opacity 0.4s ease;
+}
+
+/* Осколки печати при разбивании */
+.shard {
+position: absolute;
+width: 20px; height: 20px;
+background: #b71c1c;
+border-radius: 30%;
+pointer-events: none;
+opacity: 1;
+transition: all 0.6s ease-out;
+z-index: 6;
+}
+
+/* Тетрадный лист бумаги */
+.letter-paper {
+position: fixed;
+top: 50%; left: 50%;
+transform: translate(-50%, -50%) scale(0.1);
+width: 90vw;
+max-width: 380px;
+height: 75vh;
+background: #fdf6e3;
+background-image: linear-gradient(#e1d7c6 1px, transparent 1px);
+background-size: 100% 32px;
+border-radius: 8px;
+box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+padding: 25px 20px 80px 20px;
+opacity: 0;
+visibility: hidden;
+transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+z-index: 50;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+}
+
+.letter-paper.show {
+opacity: 1;
+visibility: visible;
+transform: translate(-50%, -50%) scale(1);
+}
+
+.letter-content {
+font-family: 'Caveat', cursive;
+font-size: 1.45rem;
+line-height: 32px;
+color: #2c2520;
+text-align: left;
+white-space: pre-line;
+}
+
+.btn-read {
+position: sticky;
+bottom: 0px;
+left: 50%;
+transform: translateX(-50%);
+margin-top: 20px;
+background: #8d6e63 !important;
+box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+z-index: 60;
+}
+
+/* АНИМАЦИЯ ЭЛЬФА */
+.elf-container {
+position: fixed;
+bottom: -150px;
+left: -150px;
+font-size: 90px;
+z-index: 80;
+transition: all 4s ease-in-out;
+pointer-events: none;
+}
+
+.elf-container.walk {
+bottom: 40%;
+left: 110vw;
+transform: rotate(15deg);
+opacity: 0;
+}
+
+/* ТУМАН */
+.fog-overlay {
+position: fixed;
+top: 0; left: 0;
+width: 100vw; height: 100vh;
+background: rgba(240, 240, 240, 0.95);
+backdrop-filter: blur(15px);
+z-index: 90;
+opacity: 0;
+visibility: hidden;
+transition: opacity 2.5s ease;
+display: flex;
+justify-content: center;
+align-items: center;
+text-align: center;
+padding: 20px;
+}
+
+.fog-overlay.active {
+opacity: 1;
+visibility: visible;
+}
+
+.fog-text {
+font-size: 1.8rem;
+color: #333;
+font-weight: 300;
+opacity: 0;
+transition: opacity 1.5s ease;
+}
+
+/* ПЫЛАЮЩЕЕ СЕРДЦЕ */
+.flaming-heart {
+position: fixed;
+top: 50%; left: 50%;
+transform: translate(-50%, -50%) scale(0);
+font-size: 100px;
+z-index: 95;
+opacity: 0;
+transition: all 2s ease;
+filter: drop-shadow(0 0 25px #ff1744) drop-shadow(0 0 50px #ff5252);
+animation: burnPulse 1.5s infinite alternate ease-in-out;
+}
+
+.flaming-heart.show {
+opacity: 1;
+transform: translate(-50%, -50%) scale(1);
+}
+
+@keyframes burnPulse {
+0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 20px #ff1744); }
+100% { transform: translate(-50%, -50%) scale(1.15); filter: drop-shadow(0 0 45px #ff5252) drop-shadow(0 0 15px #ff9100); }
+}
+</style>
+</head>
+<body id="bg">
+
+<div class="vignette"></div>
+
+<!-- Фон из ваших фото -->
+<div class="photo-bg" id="photoBg">
+<div class="polaroid p1"><img src="photo1.jpg" alt="фото"></div>
+<div class="polaroid p2"><img src="photo2.jpg" alt="фото"></div>
+<div class="polaroid p3"><img src="photo3.jpg" alt="фото"></div>
+<div class="polaroid p4"><img src="photo4.jpg" alt="фото"></div>
+<div class="polaroid p5"><img src="photo5.jpg" alt="фото"></div>
+<div class="polaroid p6"><img src="photo6.jpg" alt="фото"></div>
+<div class="polaroid p7"><img src="photo7.jpg" alt="фото"></div>
+<div class="polaroid p8"><img src="photo8.jpg" alt="фото"></div>
+</div>
+
+<div class="container">
+
+<!-- 0. Приветствие -->
+<div class="step active" id="step-0">
+<h1>Привет, любимая... ❤️</h1>
+</div>
+
+<!-- 1. Предупреждение -->
+<div class="step" id="step-1">
+<h2>Для входа на сайт нужно пройти пару вопросиков ❤️</h2>
+</div>
+
+<!-- Вопрос 1 -->
+<div class="step" id="step-q1">
+<h2>Вопрос 1<br><br>Дата начала наших отношений?</h2>
+<p class="hint" id="hint-1">Нажми в любое место на экране</p>
+<div class="input-group" id="group-1">
+<input type="text" id="ans-1" placeholder="Твой ответ..." autocomplete="off">
+<button class="btn" onclick="checkQ1()">Ответить</button>
+</div>
+</div>
+
+<!-- Вопрос 2 -->
+<div class="step" id="step-q2">
+<h2>Вопрос 2<br><br>Мое любимое слово?</h2>
+<p class="hint" id="hint-2">Нажми в любое место на экране</p>
+<div class="input-group" id="group-2">
+<input type="text" id="ans-2" placeholder="Твой ответ..." autocomplete="off">
+<button class="btn" onclick="checkQ2()">Ответить</button>
+</div>
+</div>
+
+<!-- Вопрос 3 -->
+<div class="step" id="step-q3">
+<h2>Вопрос 3<br><br>Как тебя зовут?</h2>
+<p class="hint" id="hint-3">Нажми в любое место на экране</p>
+<div class="input-group" id="group-3">
+<input type="text" id="ans-3" placeholder="Твой ответ..." autocomplete="off">
+<button class="btn" onclick="checkQ3()">Ответить</button>
+</div>
+</div>
+
+<!-- Вопрос 4 -->
+<div class="step" id="step-q4">
+<h2>Вопрос 4<br><br>Какое у меня отчество?</h2>
+<p class="hint" id="hint-4">Нажми в любое место на экране</p>
+<div class="input-group" id="group-4">
+<input type="text" id="ans-4" placeholder="Твой ответ..." autocomplete="off">
+<button class="btn" onclick="checkQ4()">Ответить</button>
+</div>
+</div>
+
+<!-- Переход -->
+<div class="step" id="step-prep">
+<h2>Ты готова к сложному вопросу?</h2>
+</div>
+
+<!-- Вопрос 5 -->
+<div class="step" id="step-q5">
+<h2>Вопрос 5<br><br>Какое отчество у моей мамы и моего отца?</h2>
+<p class="hint" id="hint-5">Нажми в любое место на экране</p>
+<div class="input-group" id="group-5">
+<input type="text" id="ans-5" placeholder="Ответ1 и Ответ2" autocomplete="off">
+<button class="btn" onclick="checkQ5()">Ответить</button>
+</div>
+</div>
+
+<!-- Настроение -->
+<div class="step" id="step-mood">
+<h2>Как твое настроение? ❤️</h2>
+<div class="mood-buttons">
+<button class="btn btn-good" onclick="selectGoodMood()">Хорошее ✨</button>
+<button class="btn btn-normal" onclick="selectNormalMood()">Нормально 😐</button>
+<button class="btn btn-bad" id="badBtn" onmouseenter="dodgeBadBtn()" onclick="dodgeBadBtn()" ontouchstart="dodgeBadBtn()">Плохое 🙁</button>
+</div>
+</div>
+
+<!-- Таймер -->
+<div class="step" id="step-timer">
+<h2>Исправляем настроение... ⏳</h2>
+<div class="timer-display" id="timerCount">30</div>
+<p style="color: #666;">Подожди немного, сейчас всё станет намного лучше!</p>
+</div>
+
+<!-- Заставка перед письмом -->
+<div class="step" id="step-letter-intro">
+<h2>Звездочка моя, для тебя письмо... 💌</h2>
+</div>
+
+<!-- Конверт -->
+<div class="step" id="step-envelope">
+<div class="envelope-wrapper" id="envelope">
+<div class="envelope-flap"></div>
+<div class="wax-seal" id="seal">📜</div>
+</div>
+</div>
+
+</div>
+
+<!-- Тетрадный лист с текстом -->
+<div class="letter-paper" id="letterPaper">
+<div class="letter-content">
+Привет, моё солнышко! ❤️
+
+Я очень рад, что ты отгадала ответы на вопросы 👸
+
+Начну издалека. Всё ещё помню тот день, когда Мота пригласил меня покататься на машине. Помню своё нежелание идти на прогулку и как что-то внутри подсказывало, что надо идти (как оказывается, не зря). До сих пор перед глазами, как эта поездка чуть не накрылась медным тазом, потому что у этого опёздола не заводилась машина. Какое же счастье, что в тот день всё-таки удалось её завести. Помню, как вы сели в салон, и до сих пор храню в памяти момент, когда впервые увидел тебя в зеркале заднего вида. Хоть мы толком и не разговаривали, та поездка мне очень запомнилась. (Моте надо было дать пизды тогда, чтобы довез тебя, а не отправлял на троллейбусе).
+
+Кажется, следующая наша с ним гулянка была только потому, что я хотел побольше узнать о тебе. В тот день я предложил вместе пожарить шашлыки, и по дороге в деревню спросил у него, занята ли ты. Жаль, что ответ был положительным... Но именно тогда я прямо сказал ему, что ты мне очень понравилась.
+Позже я был безумно счастлив узнать, что ты снова свободна, хоть всё и получилось как-то неожиданно, да ещё и с предложением сыграть свадьбу 👀 С того момента я хотел только одного, завязать личное общение. Прекрасным поводом стал день рождения Демона. Хоть и вышло недопонимание (почему этого лысого позвали, а мне написали, что не надо?….), к счастью, ты согласилась, чтобы я приехал и забрал тебя с утренника — ну и, к сожалению, владыку ада тоже 😢.
+
+Неимоверно рад, что с того самого дня мы начали общаться, гулять и находить общий язык. А 18 мая начались наши отношения, которыми я бесконечно дорожу 💋❤️💕. Хочу подытожить и сказать тебе, Зайка, что я очень сильно тебя люблю. Я счастлива, что рядом со мной есть такая красивая звёздочка 💫. Спасибо тебе за твоё тепло, наши общие взгляды, ценности и то глубокое взаимопонимание, которое есть между нами.
+
+Очень сильно тебя люблю, Зайка ❤️❤️❤️💋💋💋💕💕💕💕💕❤️‍🔥❤️‍🔥❤️‍🔥😘😘😘😘
+</div>
+<button class="btn btn-read" onclick="finishReading()">Прочитано ❤️</button>
+</div>
+
+<!-- Эльф любви -->
+<div class="elf-container" id="elf">🧝‍♂️✉️</div>
+
+<!-- Туман -->
+<div class="fog-overlay" id="fog">
+<div class="fog-text" id="fogText">Спасибо, Звездочка моя, люблю тебя 😘❤️❤️❤️</div>
+</div>
+
+<!-- Пылающее сердце -->
+<div class="flaming-heart" id="flamingHeart">❤️‍🔥</div>
+
+<script>
+const bg = document.getElementById('bg');
+let isWaitingForClick = false;
+
+function cleanText(str) {
+return str.trim().toLowerCase().replace(/[^a-zа-яё0-9]/g, '');
+}
+
+function goToStep(fromId, toId, delay = 0) {
+setTimeout(() => {
+const fromEl = document.getElementById(fromId);
+const toEl = document.getElementById(toId);
+if (fromEl) fromEl.classList.remove('active');
+setTimeout(() => {
+if (toEl) toEl.classList.add('active');
+}, 1000);
+}, delay);
+}
+
+function triggerFlash(isCorrect, callback) {
+bg.classList.add(isCorrect ? 'flash-correct' : 'flash-wrong');
+setTimeout(() => {
+bg.classList.remove('flash-correct', 'flash-wrong');
+if (callback) callback();
+}, 1000);
+}
+
+// Запуск
+window.addEventListener('DOMContentLoaded', () => {
+setTimeout(() => {
+goToStep('step-0', 'step-1');
+setTimeout(() => {
+goToStep('step-1', 'step-q1');
+setTimeout(() => { setupClickToAnswer(1); }, 1000);
+}, 3500);
+}, 4000);
+});
+
+function setupClickToAnswer(qNum) {
+isWaitingForClick = true;
+const clickHandler = (e) => {
+if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+if (isWaitingForClick) {
+isWaitingForClick = false;
+document.getElementById(`hint-${qNum}`).style.opacity = '0';
+document.getElementById(`group-${qNum}`).classList.add('show');
+window.removeEventListener('click', clickHandler);
+}
+};
+window.addEventListener('click', clickHandler);
+}
+
+// Вопросы
+function checkQ1() {
+const val = cleanText(document.getElementById('ans-1').value);
+if (val === '18мая' || val === 'мая18' || val === '1805') {
+triggerFlash(true, () => {
+goToStep('step-q1', 'step-q2');
+setTimeout(() => { setupClickToAnswer(2); }, 1000);
+});
+} else { triggerFlash(false); }
+}
+
+function checkQ2() {
+const val = cleanText(document.getElementById('ans-2').value);
+if (val === 'есесвенно' || val === 'есесвенна') {
+triggerFlash(true, () => {
+goToStep('step-q2', 'step-q3');
+setTimeout(() => { setupClickToAnswer(3); }, 1000);
+});
+} else { triggerFlash(false); }
+}
+
+function checkQ3() {
+const val = cleanText(document.getElementById('ans-3').value);
+if (['заюша', 'зайка', 'зая', 'заенька'].includes(val)) {
+triggerFlash(true, () => {
+goToStep('step-q3', 'step-q4');
+setTimeout(() => { setupClickToAnswer(4); }, 1000);
+});
+} else { triggerFlash(false); }
+}
+
+function checkQ4() {
+const val = cleanText(document.getElementById('ans-4').value);
+if (val === 'витальевич') {
+triggerFlash(true, () => {
+goToStep('step-q4', 'step-prep');
+setTimeout(() => {
+goToStep('step-prep', 'step-q5');
+setTimeout(() => { setupClickToAnswer(5); }, 1000);
+}, 3500);
+});
+} else { triggerFlash(false); }
+}
+
+function checkQ5() {
+const val = cleanText(document.getElementById('ans-5').value);
+if (val.includes('алексеевна') && val.includes('викторович')) {
+triggerFlash(true, () => {
+goToStep('step-q5', 'step-mood');
+});
+} else { triggerFlash(false); }
+}
+
+function selectGoodMood() {
+triggerFlash(true, () => {
+goToStep('step-mood', 'step-letter-intro');
+setTimeout(() => {
+goToStep('step-letter-intro', 'step-envelope');
+// Автоматический запуск анимации конверта
+setTimeout(autoOpenEnvelope, 1200);
+}, 3000);
+});
+}
+
+function selectNormalMood() {
+goToStep('step-mood', 'step-timer');
+let timeLeft = 30;
+const timerEl = document.getElementById('timerCount');
+timerEl.textContent = timeLeft;
+const countdown = setInterval(() => {
+timeLeft--;
+timerEl.textContent = timeLeft;
+if (timeLeft <= 0) {
+clearInterval(countdown);
+goToStep('step-timer', 'step-mood');
+resetBadBtn();
+}
+}, 1000);
+}
+
+function dodgeBadBtn() {
+const btn = document.getElementById('badBtn');
+const randomX = (Math.random() - 0.5) * 250;
+const randomY = (Math.random() - 0.5) * 200;
+btn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+}
+
+function resetBadBtn() {
+document.getElementById('badBtn').style.transform = `translate(0px, 0px)`;
+}
+
+// АВТОМАТИЧЕСКОЕ ОТКРЫТИЕ КОНВЕРТА
+function autoOpenEnvelope() {
+const seal = document.getElementById('seal');
+const envelope = document.getElementById('envelope');
+
+// 1. Печать сама рассыпается
+const rect = seal.getBoundingClientRect();
+for (let i = 0; i < 6; i++) {
+const shard = document.createElement('div');
+shard.classList.add('shard');
+shard.style.left = (rect.left + 20) + 'px';
+shard.style.top = (rect.top + 20) + 'px';
+document.body.appendChild(shard);
+
+const angle = Math.random() * Math.PI * 2;
+const dist = 50 + Math.random() * 60;
+setTimeout(() => {
+shard.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`;
+shard.style.opacity = '0';
+}, 20);
+
+setTimeout(() => shard.remove(), 700);
+}
+
+seal.style.opacity = '0';
+
+// 2. Раскрывается конверт
+setTimeout(() => {
+envelope.classList.add('open');
+
+// Включаем фоновый коллаж из ваших фото
+document.getElementById('photoBg').classList.add('active');
+
+// 3. Выезжает письмо
+setTimeout(() => {
+document.getElementById('letterPaper').classList.add('show');
+}, 600);
+}, 300);
+}
+
+// Нажатие на "Прочитано"
+function finishReading() {
+const paper = document.getElementById('letterPaper');
+const envelope = document.getElementById('envelope');
+const seal = document.getElementById('seal');
+
+paper.classList.remove('show');
+
+setTimeout(() => {
+envelope.classList.remove('open');
+seal.innerHTML = '❤️';
+seal.style.opacity = '1';
+
+setTimeout(() => {
+const elf = document.getElementById('elf');
+elf.classList.add('walk');
+
+setTimeout(() => {
+const fog = document.getElementById('fog');
+const fogText = document.getElementById('fogText');
+fog.classList.add('active');
+
+setTimeout(() => {
+fogText.style.opacity = '1';
+}, 1000);
+
+setTimeout(() => {
+fogText.style.opacity = '0';
+}, 6000);
+
+setTimeout(() => {
+fog.classList.remove('active');
+setTimeout(() => {
+document.getElementById('flamingHeart').classList.add('show');
+}, 800);
+}, 8000);
+
+}, 2000);
+
+}, 1000);
+
+}, 800);
+}
+
+// Enter на клавиатуре
+document.querySelectorAll('input').forEach((input) => {
+input.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') {
+const btn = input.nextElementSibling;
+if (btn) btn.click();
+}
+});
+});
+</script>
+</body>
+</html>
